@@ -53,17 +53,16 @@ Page({
 
   onHandleUploadFileEvent: function () {
     var that = this;
-    var imgList = this.data.imageList;
+    
     var filename;
     var filePath;
-    var prefix;
+    
     util.chooseImage()
     .then(res=>{ 
       util.showLoading("上传中");
         filePath = res.tempFiles[0].path;
         //获取文件名
         filename = filePath.substr(filePath.lastIndexOf('/') + 1);
-        prefix = 'https://' + config.Bucket + '.cos.' + config.Region + '.myqcloud.com' + '/' + filename;
         return util.getImageInfo(filePath);
      
     }).then(res=>{
@@ -76,23 +75,29 @@ Page({
         util.hideLoading();
         if (!err) {
           util.showToast("上传成功", true);
-          var dic;
-          let time = util.timestampToString(data.headers.Date, 'L');
-          dic = { "ImgUrl": prefix, "Date": time };
-          imgList.unshift(dic);
-          that.setData({
-            ShowMainView: true,
-            imageList: imgList
-          })
+          that.handleUpdateView(filename,data);
         } else {
           util.showToast("上传失败", false);
         }
 
       });
     })
-   
   },
- 
+  
+  handleUpdateView: function (filename,data){
+    var dic;
+    var that = this;
+    var imgList = this.data.imageList;
+    var prefix = 'https://' + config.Bucket + '.cos.' + config.Region + '.myqcloud.com' + '/' + filename;
+
+    let time = util.timestampToString(data.headers.Date, 'L');
+    dic = { "ImgUrl": prefix, "Date": time };
+    imgList.unshift(dic);
+    that.setData({
+      ShowMainView: true,
+      imageList: imgList
+    })
+  },
 
   onHandleShowImageDetailEvent:function(e){
   
